@@ -6,6 +6,7 @@ const BOARD_WIDTH = 3;
 
 class State extends Schema {
   @type("string") currentTurn: string;
+  @type("string") creator: string;
   @type({ map: "boolean" }) players = new MapSchema<boolean>();
   @type(["number"]) board: number[] = new ArraySchema<number>(0, 0, 0, 0, 0, 0, 0, 0, 0);
   @type("string") winner: string;
@@ -24,10 +25,12 @@ export class BallPool extends Room<State> {
   onJoin(client: Client) {
     this.state.players.set(client.sessionId, true);
 
-    if (this.state.players.size === 2) {
+    if (this.state.players.size === 1) {
       this.state.currentTurn = client.sessionId;
-      this.setAutoMoveTimeout();
-
+      this.state.creator = client.sessionId;
+    }
+    else if (this.state.players.size === 2) {
+      // this.setAutoMoveTimeout();
       // lock this room for new users
       this.lock();
     }
