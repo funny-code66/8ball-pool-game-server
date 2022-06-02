@@ -12,6 +12,10 @@ class State extends Schema {
   @type(["number"]) board: number[] = new ArraySchema<number>(0, 0, 0, 0, 0, 0, 0, 0, 0);
   @type("string") winner: string;
   @type("boolean") draw: boolean;
+
+  @type("string") stickAngle: string = "180";
+  @type("string") stickOffset: string = "180";
+  @type("string") mouseClickState: string;
 }
 
 export class BallPool extends Room<State> {
@@ -20,8 +24,9 @@ export class BallPool extends Room<State> {
 
   onCreate(options: any) {
     this.setState(new State());
-    // this.onMessage("action", (client, message) => this.playerAction(client, message));
+    this.onMessage("change_stick_angle", (client, message) => this.playerAction(client, message));
     this.onMessage("change_turn", (client) => this.playerChangeTurn(client));
+    this.onMessage("change_mouse_click", (client, message) => this.playerChangeMouseClick(client, message));
   }
 
   onJoin(client: Client) {
@@ -39,9 +44,18 @@ export class BallPool extends Room<State> {
     }
   }
 
+  playerAction(client: Client, message: any) {
+    console.log("message", message)
+    this.state.stickAngle = message;
+  }
+
   playerChangeTurn(client: Client) {
     this.state.currentTurn = (client.sessionId == this.state.creator) ? this.state.joiner : this.state.creator;
     console.log(this.state.currentTurn)
+  }
+
+  playerChangeMouseClick(client: Client, message: any) {
+    this.state.mouseClickState = message;
   }
 
   checkBoardComplete() {
